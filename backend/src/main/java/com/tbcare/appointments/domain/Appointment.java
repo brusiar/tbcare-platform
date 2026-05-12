@@ -13,8 +13,11 @@ public class Appointment extends TenantAwareEntity {
     @Column(name = "patient_id", nullable = false)
     private UUID patientId;
 
-    @Column(name = "user_id", nullable = false)
-    private UUID userId;
+    @Column(name = "professional_id", nullable = false)
+    private UUID professionalId;
+
+    @Column(name = "recurrence_id")
+    private UUID recurrenceId;
 
     @Column(name = "scheduled_at", nullable = false)
     private LocalDateTime scheduledAt;
@@ -25,6 +28,9 @@ public class Appointment extends TenantAwareEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private AppointmentStatus status = AppointmentStatus.SCHEDULED;
+
+    @Column(name = "meet_link")
+    private String meetLink;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
@@ -37,12 +43,20 @@ public class Appointment extends TenantAwareEntity {
         this.patientId = patientId;
     }
 
-    public UUID getUserId() {
-        return userId;
+    public UUID getProfessionalId() {
+        return professionalId;
     }
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
+    public void setProfessionalId(UUID professionalId) {
+        this.professionalId = professionalId;
+    }
+
+    public UUID getRecurrenceId() {
+        return recurrenceId;
+    }
+
+    public void setRecurrenceId(UUID recurrenceId) {
+        this.recurrenceId = recurrenceId;
     }
 
     public LocalDateTime getScheduledAt() {
@@ -67,6 +81,14 @@ public class Appointment extends TenantAwareEntity {
 
     public void setStatus(AppointmentStatus status) {
         this.status = status;
+    }
+
+    public String getMeetLink() {
+        return meetLink;
+    }
+
+    public void setMeetLink(String meetLink) {
+        this.meetLink = meetLink;
     }
 
     public String getNotes() {
