@@ -22,7 +22,7 @@ tbcare-platform/
 ├── backend/
 │   └── src/main/java/com/tbcare/
 │       ├── TbCareApplication.java
-│       ├── auth/                    # Módulo de autenticação (futuro)
+│       ├── auth/                    # Módulo de autenticação
 │       ├── users/                   # Módulo de usuários
 │       │   ├── controller/
 │       │   ├── service/
@@ -37,7 +37,7 @@ tbcare-platform/
 │       │   ├── TenantAwareEntity.java
 │       │   ├── exception/
 │       │   └── response/
-│       ├── security/                # Configurações de segurança (futuro)
+│       ├── security/                # Configurações de segurança
 │       └── config/                  # Configurações Spring
 ├── frontend/
 │   └── src/
@@ -73,7 +73,7 @@ Módulos se comunicam via **service**, nunca diretamente entre repositories. Iss
 
 ### Preparação Multi-Tenant
 
-Toda entidade de negócio herda de `TenantAwareEntity`, que carrega `tenant_id`. O isolamento de dados por tenant é feito via filtro na query (Row-Level Isolation). Quando autenticação for implementada, o `tenant_id` virá do contexto de segurança automaticamente.
+Toda entidade de negócio herda de `TenantAwareEntity`, que carrega `tenant_id`. O isolamento de dados por tenant é feito via filtro na query (Row-Level Isolation). O `tenant_id` é extraído automaticamente do JWT via `TenantContext`.
 
 ```
 BaseEntity (id, createdAt, updatedAt)
@@ -152,18 +152,27 @@ docker compose up postgres
 
 ## Endpoints da API
 
-| Método | Rota                    | Descrição                  |
-|--------|-------------------------|----------------------------|
-| GET    | /api/health             | Status da API              |
-| GET    | /api/patients           | Listar pacientes           |
-| POST   | /api/patients           | Criar paciente             |
-| GET    | /api/patients/{id}      | Buscar paciente            |
-| PUT    | /api/patients/{id}      | Atualizar paciente         |
-| DELETE | /api/patients/{id}      | Desativar paciente         |
-| GET    | /api/appointments       | Listar consultas (período) |
-| POST   | /api/appointments       | Criar consulta             |
-| GET    | /api/appointments/{id}  | Buscar consulta            |
-| PUT    | /api/appointments/{id}  | Atualizar consulta         |
+### Autenticação
+
+| Método | Rota           | Descrição                  | Auth |
+|--------|----------------|----------------------------|------|
+| POST   | /api/auth/login| Login (retorna JWT)        | ❌   |
+| GET    | /api/auth/me   | Dados do usuário autenticado| ✅   |
+
+### Recursos
+
+| Método | Rota                    | Descrição                  | Auth |
+|--------|-------------------------|----------------------------|------|
+| GET    | /api/health             | Status da API              | ❌   |
+| GET    | /api/patients           | Listar pacientes           | ✅   |
+| POST   | /api/patients           | Criar paciente             | ✅   |
+| GET    | /api/patients/{id}      | Buscar paciente            | ✅   |
+| PUT    | /api/patients/{id}      | Atualizar paciente         | ✅   |
+| DELETE | /api/patients/{id}      | Desativar paciente         | ✅   |
+| GET    | /api/appointments       | Listar consultas (período) | ✅   |
+| POST   | /api/appointments       | Criar consulta             | ✅   |
+| GET    | /api/appointments/{id}  | Buscar consulta            | ✅   |
+| PUT    | /api/appointments/{id}  | Atualizar consulta         | ✅   |
 
 ---
 
@@ -171,9 +180,10 @@ docker compose up postgres
 
 Migrations gerenciadas pelo **Flyway** em `src/main/resources/db/migration/`.
 
-| Migration              | Descrição                        |
-|------------------------|----------------------------------|
-| V1__initial_schema.sql | Schema base: tenants, users, patients, appointments |
+| Migration                  | Descrição                        |
+|----------------------------|----------------------------------|
+| V1__initial_schema.sql     | Schema base: tenants, users, patients, appointments |
+| V2__add_authentication.sql | Adiciona password_hash e usuários seed |
 
 ---
 
@@ -189,6 +199,8 @@ Migrations gerenciadas pelo **Flyway** em `src/main/resources/db/migration/`.
 | DB_USER        | tbcare      | Usuário do banco   |
 | DB_PASSWORD    | tbcare      | Senha do banco     |
 | SERVER_PORT    | 8080        | Porta da API       |
+| JWT_SECRET     | (ver abaixo)| Secret para JWT (min 256 bits) |
+| JWT_EXPIRATION | 86400000    | Expiração JWT (24h em ms) |
 
 ### Frontend
 
@@ -198,11 +210,61 @@ Migrations gerenciadas pelo **Flyway** em `src/main/resources/db/migration/`.
 
 ---
 
+## Autenticação
+
+### Usuários de Desenvolvimento
+
+**Admin:**
+- Email: `admin@tbcare.com`
+- Senha: `admin123`
+- Role: `ADMIN`
+
+**Profissional:**
+- Email: `joao@tbcare.com`
+- Senha: `prof123`
+- Role: `PROFESSIONAL`
+
+### Exemplo de Login
+
+```bash
+# Login
+curl -X POST http://localhost:8082/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@tbcare.com",
+    "password": "admin123"
+  }'
+
+# Usar token retornado
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Buscar usuário autenticado
+curl http://localhost:8082/api/auth/me \
+  -H "Authorization: Bearer $TOKEN"
+
+# Listar pacientes (isolado por tenant)
+curl http://localhost:8082/api/patients \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Documentação Completa
+
+Veja [SECURITY-ARCHITECTURE.md](./SECURITY-ARCHITECTURE.md) para detalhes completos sobre:
+- Fluxo de autenticação JWT
+- Isolamento multi-tenant
+- Roles e permissões
+- Segurança de senhas
+- Boas práticas
+
+---
+
 ## Próximas Etapas
 
-- [ ] Autenticação JWT (módulo `auth` + `security`)
-- [ ] Multi-tenant completo (filtro automático por tenant)
-- [ ] DTOs com validação (Bean Validation)
+- [x] Autenticação JWT (módulo `auth` + `security`)
+- [x] Multi-tenant completo (filtro automático por tenant)
+- [x] DTOs com validação (Bean Validation)
 - [ ] Testes unitários e de integração
 - [ ] Paginação nas listagens
 - [ ] Implementação das telas com dados reais
+- [ ] Refresh tokens
+- [ ] Rate limiting por tenant

@@ -3,6 +3,7 @@ package com.tbcare.patients.controller;
 import com.tbcare.common.response.ApiResponse;
 import com.tbcare.patients.domain.Patient;
 import com.tbcare.patients.service.PatientService;
+import com.tbcare.security.TenantContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +15,6 @@ import java.util.UUID;
 @RequestMapping("/patients")
 public class PatientController {
 
-    // TODO: Replace with tenant from security context when auth is implemented
-    private static final UUID DEFAULT_TENANT = UUID.fromString("00000000-0000-0000-0000-000000000001");
-
     private final PatientService patientService;
 
     public PatientController(PatientService patientService) {
@@ -25,7 +23,8 @@ public class PatientController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Patient>>> findAll() {
-        return ResponseEntity.ok(ApiResponse.ok(patientService.findAll(DEFAULT_TENANT)));
+        UUID tenantId = TenantContext.getTenantId();
+        return ResponseEntity.ok(ApiResponse.ok(patientService.findAll(tenantId)));
     }
 
     @GetMapping("/{id}")
@@ -35,7 +34,8 @@ public class PatientController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Patient>> create(@RequestBody Patient patient) {
-        patient.setTenantId(DEFAULT_TENANT);
+        UUID tenantId = TenantContext.getTenantId();
+        patient.setTenantId(tenantId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(patientService.create(patient), "Patient created"));
     }

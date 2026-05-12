@@ -13,9 +13,12 @@ public class User extends TenantAwareEntity {
     @Column(nullable = false)
     private String email;
 
+    @Column(name = "password_hash")
+    private String passwordHash;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private UserRole role = UserRole.USER;
+    private UserRole role = UserRole.PROFESSIONAL;
 
     @Column(nullable = false)
     private boolean active = true;
@@ -34,6 +37,14 @@ public class User extends TenantAwareEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public UserRole getRole() {

@@ -40,3 +40,8 @@ logging:
   level:
     com.tbcare: DEBUG
     org.flywaydb: INFO
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:tbcare-secret-key-change-in-production-min-256-bits-required-for-hs256-algorithm}
+    expiration: ${JWT_EXPIRATION:86400000}
