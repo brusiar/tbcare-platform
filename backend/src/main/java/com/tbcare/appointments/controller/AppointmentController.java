@@ -1,8 +1,10 @@
 package com.tbcare.appointments.controller;
 
-import com.tbcare.appointments.domain.Appointment;
+import com.tbcare.appointments.dto.AppointmentRequest;
+import com.tbcare.appointments.dto.AppointmentResponse;
 import com.tbcare.appointments.service.AppointmentService;
 import com.tbcare.common.response.ApiResponse;
+import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,6 @@ import java.util.UUID;
 @RequestMapping("/appointments")
 public class AppointmentController {
 
-    // TODO: Replace with tenant from security context when auth is implemented
-    private static final UUID DEFAULT_TENANT = UUID.fromString("00000000-0000-0000-0000-000000000001");
-
     private final AppointmentService appointmentService;
 
     public AppointmentController(AppointmentService appointmentService) {
@@ -26,26 +25,30 @@ public class AppointmentController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Appointment>>> findByPeriod(
+    public ResponseEntity<ApiResponse<List<AppointmentResponse>>> findByPeriod(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
-        return ResponseEntity.ok(ApiResponse.ok(appointmentService.findByPeriod(DEFAULT_TENANT, start, end)));
+        return ResponseEntity.ok(ApiResponse.ok(appointmentService.findByPeriod(start, end)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Appointment>> findById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<AppointmentResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.ok(appointmentService.findById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Appointment>> create(@RequestBody Appointment appointment) {
-        appointment.setTenantId(DEFAULT_TENANT);
+    public ResponseEntity<ApiResponse<AppointmentResponse>> create(@Valid @RequestBody AppointmentRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok(appointmentService.create(appointment), "Appointment created"));
+                .body(ApiResponse.ok(appointmentService.create(request), "Appointment created successfully"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Appointment>> update(@PathVariable UUID id, @RequestBody Appointment appointment) {
-        return ResponseEntity.ok(ApiResponse.ok(appointmentService.update(id, appointment)));
+    public ResponseEntity<ApiResponse<AppointmentResponse>> update(@PathVariable UUID id, @Valid @RequestBody AppointmentRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(appointmentService.update(id, request), "Appointment updated successfully"));
+    }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<ApiResponse<AppointmentResponse>> cancel(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.ok(appointmentService.cancel(id), "Appointment cancelled successfully"));
     }
 }
