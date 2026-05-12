@@ -31,6 +31,7 @@ tbcare-platform/
 │       │   └── dto/
 │       ├── patients/                # Módulo de pacientes
 │       ├── appointments/            # Módulo de consultas
+│       ├── professionals/           # Módulo de profissionais
 │       ├── tenants/                 # Módulo de tenants
 │       ├── common/                  # Utilitários compartilhados
 │       │   ├── BaseEntity.java
@@ -77,10 +78,13 @@ Toda entidade de negócio herda de `TenantAwareEntity`, que carrega `tenant_id`.
 
 ```
 BaseEntity (id, createdAt, updatedAt)
+    ├── Tenant
     └── TenantAwareEntity (+ tenantId)
             ├── User
+            ├── Professional
             ├── Patient
-            └── Appointment
+            ├── Appointment
+            └── AppointmentRecurrence
 ```
 
 ### Resposta Padrão da API
@@ -173,6 +177,7 @@ docker compose up postgres
 | POST   | /api/appointments       | Criar consulta             | ✅   |
 | GET    | /api/appointments/{id}  | Buscar consulta            | ✅   |
 | PUT    | /api/appointments/{id}  | Atualizar consulta         | ✅   |
+| PUT    | /api/appointments/{id}/cancel | Cancelar consulta    | ✅   |
 
 ---
 
@@ -184,6 +189,7 @@ Migrations gerenciadas pelo **Flyway** em `src/main/resources/db/migration/`.
 |----------------------------|----------------------------------|
 | V1__initial_schema.sql     | Schema base: tenants, users, patients, appointments |
 | V2__add_authentication.sql | Adiciona password_hash e usuários seed |
+| V3__domain_initial.sql     | Professionals, recorrências e expansão de appointments |
 
 ---
 
@@ -256,6 +262,40 @@ Veja [SECURITY-ARCHITECTURE.md](./SECURITY-ARCHITECTURE.md) para detalhes comple
 - Segurança de senhas
 - Boas práticas
 
+Veja [DOMAIN-MODELING.md](./DOMAIN-MODELING.md) para detalhes sobre:
+- Modelagem do domínio
+- Decisões de design
+- Estrutura de recorrência
+- Fluxos principais
+- Evolução futura
+
+---
+
+## Funcionalidades
+
+### Gestão de Pacientes
+- ✅ Cadastro completo (nome, email, telefone, data nascimento, observações)
+- ✅ Listagem de pacientes ativos
+- ✅ Edição de dados
+- ✅ Desativação (soft delete)
+- ✅ Interface web responsiva
+
+### Agenda e Sessões
+- ✅ Visualização de agenda por dia
+- ✅ Navegação entre dias (anterior/hoje/próximo)
+- ✅ Criação de sessões
+- ✅ Status de sessões (Agendada, Confirmada, Realizada, Cancelada, Faltou)
+- ✅ Link da sala Google Meet por profissional
+- ✅ Cancelamento de sessões
+- ✅ Duração configurável
+- 🔄 Recorrência (estrutura pronta, geração manual)
+
+### Profissionais
+- ✅ Cadastro de profissionais
+- ✅ Link fixo da sala Google Meet
+- ✅ Especialidade
+- ✅ Vinculação com usuário do sistema
+
 ---
 
 ## Próximas Etapas
@@ -263,8 +303,15 @@ Veja [SECURITY-ARCHITECTURE.md](./SECURITY-ARCHITECTURE.md) para detalhes comple
 - [x] Autenticação JWT (módulo `auth` + `security`)
 - [x] Multi-tenant completo (filtro automático por tenant)
 - [x] DTOs com validação (Bean Validation)
+- [x] CRUD de pacientes (backend + frontend)
+- [x] Agenda funcional (backend + frontend)
+- [x] Sessões funcionais (backend + frontend)
+- [x] Estrutura de recorrência preparada
+- [ ] Geração automática de sessões recorrentes
+- [ ] Validação de conflitos de horário
 - [ ] Testes unitários e de integração
 - [ ] Paginação nas listagens
-- [ ] Implementação das telas com dados reais
 - [ ] Refresh tokens
 - [ ] Rate limiting por tenant
+- [ ] Notificações de lembrete
+- [ ] Portal do paciente
