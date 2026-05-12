@@ -15,7 +15,7 @@ VALUES (
     '00000000-0000-0000-0000-000000000001',
     'Admin User',
     'admin@tbcare.com',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+    '$2a$10$ZH381I8LXmzyZCKlEny0..ZDmrsYx.3B6uELYz0BVRbQyXE46yXtG',
     'ADMIN',
     true
 );
@@ -28,7 +28,7 @@ VALUES (
     '00000000-0000-0000-0000-000000000001',
     'Dr. João Silva',
     'joao@tbcare.com',
-    '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    '$2a$10$kVLO3FxP6juwq0VcFux.RO8FWc5vYeKtFBpq7NvwyF2jLSWVEPOOa',
     'PROFESSIONAL',
     true
 );
