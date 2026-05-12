@@ -1,0 +1,28 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar arquivos de dependências
+COPY package.json package-lock.json* ./
+
+# Instalar dependências com timeout maior e retry
+RUN npm config set fetch-timeout 600000 && \
+    npm config set fetch-retries 5 && \
+    npm install --prefer-offline --no-audit --legacy-peer-deps || \
+    npm install --prefer-offline --no-audit --legacy-peer-deps
+
+# Copiar código fonte
+COPY . .
+
+# Build
+RUN npm run build
+
+# Expor porta
+EXPOSE 3000
+
+# Variável de ambiente
+ENV PORT=3000
+ENV NODE_ENV=production
+
+# Comando de inicialização
+CMD ["npm", "start"]
