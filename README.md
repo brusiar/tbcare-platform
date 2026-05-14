@@ -122,7 +122,7 @@ cd backend
 mvn spring-boot:run
 ```
 
-API disponível em: `http://localhost:8082/api`
+API disponível em: `http://localhost:8081/api`
 
 ### Frontend
 
@@ -132,7 +132,7 @@ npm install
 npm run dev
 ```
 
-App disponível em: `http://localhost:3003`
+App disponível em: `http://localhost:3002`
 
 ---
 
@@ -148,9 +148,9 @@ docker compose up postgres
 
 | Serviço   | URL                          |
 |-----------|------------------------------|
-| Frontend  | http://localhost:3003        |
-| Backend   | http://localhost:8082/api    |
-| Postgres  | localhost:5434               |
+| Frontend  | http://localhost:3002        |
+| Backend   | http://localhost:8081/api    |
+| Postgres  | localhost:5433               |
 
 ---
 
@@ -212,7 +212,7 @@ Migrations gerenciadas pelo **Flyway** em `src/main/resources/db/migration/`.
 
 | Variável              | Padrão                      | Descrição       |
 |-----------------------|-----------------------------|-----------------|
-| NEXT_PUBLIC_API_URL   | http://localhost:8082/api   | URL da API      |
+| NEXT_PUBLIC_API_URL   | http://localhost:8081/api   | URL da API      |
 
 ---
 
@@ -234,7 +234,7 @@ Migrations gerenciadas pelo **Flyway** em `src/main/resources/db/migration/`.
 
 ```bash
 # Login
-curl -X POST http://localhost:8082/api/auth/login \
+curl -X POST http://localhost:8081/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@tbcare.com",
@@ -245,11 +245,11 @@ curl -X POST http://localhost:8082/api/auth/login \
 TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Buscar usuário autenticado
-curl http://localhost:8082/api/auth/me \
+curl http://localhost:8081/api/auth/me \
   -H "Authorization: Bearer $TOKEN"
 
 # Listar pacientes (isolado por tenant)
-curl http://localhost:8082/api/patients \
+curl http://localhost:8081/api/patients \
   -H "Authorization: Bearer $TOKEN"
 ```
 
