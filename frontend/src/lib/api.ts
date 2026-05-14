@@ -1,6 +1,6 @@
 import { auth } from './auth'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8082/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api'
 
 interface ApiResponse<T> {
   success: boolean
@@ -11,9 +11,12 @@ interface ApiResponse<T> {
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const token = auth.getToken()
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...options?.headers,
+  }
+
+  if (options?.headers) {
+    Object.assign(headers, options.headers)
   }
 
   if (token) {
@@ -21,8 +24,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   }
 
   const response = await fetch(`${API_URL}${path}`, {
-    headers,
     ...options,
+    headers,
   })
 
   if (response.status === 401) {
