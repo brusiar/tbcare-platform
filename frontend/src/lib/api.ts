@@ -1,17 +1,45 @@
+import { auth } from './auth'
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8082/api'
 
+interface ApiResponse<T> {
+  success: boolean
+  data: T
+  message: string | null
+  timestamp: string
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = auth.getToken()
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options?.headers,
+  }
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
   const response = await fetch(`${API_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers,
     ...options,
   })
 
+  if (response.status === 401) {
+    auth.logout()
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login'
+    }
+    throw new Error('Não autorizado')
+  }
+
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Request failed' }))
+    const error = await response.json().catch(() => ({ message: 'Erro na requisição' }))
     throw new Error(error.message || `HTTP ${response.status}`)
   }
 
-  return response.json()
+  const apiResponse: ApiResponse<T> = await response.json()
+  return apiResponse.data
 }
 
 export const api = {

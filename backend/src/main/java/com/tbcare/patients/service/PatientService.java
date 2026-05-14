@@ -28,6 +28,7 @@ public class PatientService {
         return patientRepository.findByTenantIdAndActiveTrue(tenantId)
                 .stream()
                 .map(this::toResponse)
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
                 .collect(Collectors.toList());
     }
 

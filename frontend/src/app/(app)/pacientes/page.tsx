@@ -8,19 +8,35 @@ import { Card } from '@/components/ui/Card'
 
 export default function PacientesPage() {
   const [patients, setPatients] = useState<Patient[]>([])
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     loadPatients()
   }, [])
+
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = patients.filter(patient => 
+        patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (patient.email && patient.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (patient.phone && patient.phone.includes(searchTerm))
+      )
+      setFilteredPatients(filtered)
+    } else {
+      setFilteredPatients(patients)
+    }
+  }, [searchTerm, patients])
 
   async function loadPatients() {
     try {
       setLoading(true)
       const response = await api.get<ApiResponse<Patient[]>>('/patients')
       setPatients(response.data)
+      setFilteredPatients(response.data)
     } catch (error) {
       console.error('Erro ao carregar pacientes:', error)
     } finally {
@@ -70,21 +86,39 @@ export default function PacientesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <h1 className="text-2xl font-bold text-gray-900">Pacientes</h1>
         <Button onClick={handleNew}>+ Novo Paciente</Button>
       </div>
 
-      {patients.length === 0 ? (
+      {patients.length > 0 && (
+        <div className="flex-1 w-full sm:max-w-md">
+          <input
+            type="text"
+            placeholder="Buscar por nome, email ou telefone..."
+            className="input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      )}
+
+      <p className="text-sm text-gray-600">
+        {filteredPatients.length} paciente(s) {searchTerm && 'encontrado(s)'}
+      </p>
+
+      {filteredPatients.length === 0 ? (
         <Card>
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">Nenhum paciente cadastrado</p>
-            <Button onClick={handleNew}>Cadastrar Primeiro Paciente</Button>
+            <p className="text-gray-500 mb-4">
+              {searchTerm ? 'Nenhum paciente encontrado' : 'Nenhum paciente cadastrado'}
+            </p>
+            {!searchTerm && <Button onClick={handleNew}>Cadastrar Primeiro Paciente</Button>}
           </div>
         </Card>
       ) : (
         <div className="grid gap-4">
-          {patients.map((patient) => (
+          {filteredPatients.map((patient) => (
             <Card key={patient.id}>
               <div className="flex justify-between items-start">
                 <div className="flex-1">

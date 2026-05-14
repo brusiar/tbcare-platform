@@ -65,6 +65,10 @@ public class AppointmentService {
         var professional = professionalRepository.findByIdAndTenantId(request.getProfessionalId(), tenantId)
                 .orElseThrow(() -> new EntityNotFoundException("Professional not found"));
 
+        // Validate no conflicts
+        validateNoConflicts(tenantId, request.getProfessionalId(), request.getScheduledAt(), 
+                           request.getDurationMin() != null ? request.getDurationMin() : 60, null);
+
         Appointment appointment = new Appointment();
         appointment.setTenantId(tenantId);
         appointment.setPatientId(request.getPatientId());
@@ -97,6 +101,15 @@ public class AppointmentService {
             professionalRepository.findByIdAndTenantId(request.getProfessionalId(), tenantId)
                     .orElseThrow(() -> new EntityNotFoundException("Professional not found"));
             appointment.setProfessionalId(request.getProfessionalId());
+        }
+
+        // Check if time or professional changed, validate conflicts
+        UUID professionalId = request.getProfessionalId() != null ? request.getProfessionalId() : appointment.getProfessionalId();
+        LocalDateTime scheduledAt = request.getScheduledAt() != null ? request.getScheduledAt() : appointment.getScheduledAt();
+        Integer duration = request.getDurationMin() != null ? request.getDurationMin() : appointment.getDurationMin();
+        
+        if (request.getScheduledAt() != null || request.getProfessionalId() != null || request.getDurationMin() != null) {
+            validateNoConflicts(tenantId, professionalId, scheduledAt, duration, id);
         }
 
         if (request.getScheduledAt() != null) {
@@ -133,6 +146,22 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointment = appointmentRepository.save(appointment);
         return toResponse(appointment);
+    }
+
+    private void validateNoConflicts(UUID tenantId, UUID professionalId, LocalDateTime scheduledAt, 
+                                    Integer durationMin, UUID excludeId) {
+        LocalDateTime endTime = scheduledAt.plusMinutes(durationMin);
+        UUID safeExcludeId = excludeId != null ? excludeId : UUID.randomUUID();
+        
+        List<Appointment> conflicts = appointmentRepository.findConflictingAppointments(
+            tenantId, professionalId, scheduledAt, endTime, AppointmentStatus.CANCELLED, safeExcludeId
+        );
+        
+        if (!conflicts.isEmpty()) {
+            throw new com.tbcare.common.exception.AppointmentConflictException(
+                "Professional already has an appointment at this time"
+            );
+        }
     }
 
     private AppointmentResponse toResponse(Appointment appointment) {

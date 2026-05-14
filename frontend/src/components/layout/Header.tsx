@@ -1,9 +1,30 @@
+'use client'
+
+import { auth } from '@/lib/auth'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+
 interface HeaderProps {
   title: string
   subtitle?: string
 }
 
 export function Header({ title, subtitle }: HeaderProps) {
+  const router = useRouter()
+  const [userName, setUserName] = useState('U')
+
+  useEffect(() => {
+    const user = auth.getUser()
+    if (user) {
+      setUserName(user.name.charAt(0).toUpperCase())
+    }
+  }, [])
+
+  function handleLogout() {
+    auth.logout()
+    router.push('/login')
+  }
+
   return (
     <header className="bg-white border-b border-gray-100 px-8 py-5">
       <div className="flex items-center justify-between">
@@ -12,8 +33,14 @@ export function Header({ title, subtitle }: HeaderProps) {
           {subtitle && <p className="text-sm text-text-muted mt-0.5">{subtitle}</p>}
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={handleLogout}
+            className="text-sm text-text-muted hover:text-text transition-colors"
+          >
+            Sair
+          </button>
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-medium">
-            U
+            {userName}
           </div>
         </div>
       </div>
