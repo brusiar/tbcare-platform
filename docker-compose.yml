@@ -39,9 +39,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://SEU_IP_SERVIDOR:8081/api
     container_name: tbcare-frontend
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8081/api
+      NEXT_PUBLIC_API_URL: http://SEU_IP_SERVIDOR:8081/api
     ports:
       - "3002:3000"
     depends_on:
