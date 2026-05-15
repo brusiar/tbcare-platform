@@ -9,11 +9,11 @@ COPY settings.xml /root/.m2/settings.xml
 
 # Copiar pom.xml e baixar dependências (camada cacheável)
 COPY pom.xml .
-RUN mvn dependency:go-offline -B || true
+RUN mvn dependency:go-offline -B
 
 # Copiar código e buildar
 COPY src ./src
-RUN mvn clean package -DskipTests -o
+RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
