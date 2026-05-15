@@ -35,9 +35,15 @@ export default function LoginPage() {
         password,
       })
 
+      console.log('Login bem-sucedido:', response)
       auth.setToken(response.token)
       auth.setUser(response.user)
-      router.push('/dashboard')
+      console.log('Token salvo, redirecionando...')
+      
+      // Forçar navegação para dashboard
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 100)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login')
     } finally {
