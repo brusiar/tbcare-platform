@@ -51,9 +51,12 @@ public class SecurityConfig {
     private org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
         org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
-        config.setAllowedOrigins(java.util.List.of("*"));
-        config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        config.applyPermitDefaultValues();
+        config.setAllowedOriginPatterns(java.util.List.of("*"));
+        config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
         config.setAllowedHeaders(java.util.List.of("*"));
+        config.setExposedHeaders(java.util.List.of("Authorization", "Content-Type"));
+        config.setMaxAge(3600L);
         config.setAllowCredentials(true);
         ((org.springframework.web.cors.UrlBasedCorsConfigurationSource) source).registerCorsConfiguration("/**", config);
         return source;
