@@ -40,10 +40,8 @@ export default function LoginPage() {
       auth.setUser(response.user)
       console.log('Token salvo, redirecionando...')
       
-      // Forçar navegação para dashboard
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 100)
+      // Usar window.location para forçar redirecionamento
+      window.location.href = '/dashboard'
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login')
     } finally {
