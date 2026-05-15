@@ -1,6 +1,6 @@
 import { auth } from './auth'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://ademir:8081/api'
 
 if (typeof window !== 'undefined') {
   console.log('API_URL:', API_URL)
