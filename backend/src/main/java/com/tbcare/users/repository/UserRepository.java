@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, UUID> {
     List<User> findByTenantIdAndActiveTrue(UUID tenantId);
     Optional<User> findByEmailAndActiveTrue(String email);
+    Optional<User> findByIdAndTenantId(UUID id, UUID tenantId);
 }
