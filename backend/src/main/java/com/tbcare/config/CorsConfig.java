@@ -18,7 +18,13 @@ public class CorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(allowedOrigins.split(",")));
+        
+        if ("*".equals(allowedOrigins)) {
+            config.addAllowedOriginPattern("*");
+        } else {
+            config.setAllowedOrigins(List.of(allowedOrigins.split(",")));
+        }
+        
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
