@@ -142,6 +142,7 @@ public class RecurrenceService {
                 yield date.getDayOfWeek().getValue() == recurrence.getDayOfWeek() && weeksBetween % 2 == 0;
             }
             case MONTHLY -> date.getDayOfMonth() == recurrence.getStartDate().getDayOfMonth();
+            case NONE -> false;
         };
     }
 
